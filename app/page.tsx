@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ImageUploader from "./image-uploader";
+import ImageUploader from "@/components/image-uploader";
 import { Upload, Info, AlertTriangle } from "lucide-react";
 import {
   Card,
