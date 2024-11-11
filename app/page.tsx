@@ -25,7 +25,9 @@ export default function Home() {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Upload className="w-6 h-6 text-blue-600" />
-              <h1 className="text-2xl font-semibold tracking-tight">图片上传</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                图片上传
+              </h1>
             </div>
             <p className="text-sm text-gray-600 max-w-2xl">
               支持拖拽或点击上传图片，可同时上传多张图片。上传后支持预览、删除等操作，提供网格和列表两种查看模式。

@@ -1,13 +1,15 @@
 "use client";
 import React, { useState, useCallback, useRef } from "react";
-import { Upload, X, Expand, Minimize, Grid, List } from "lucide-react";
+import { Upload, X, Expand, Minimize, Grid, List, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useRouter } from "next/navigation";
 
 interface UploadedFile {
   file: File;
   preview: string;
+  id: string;
 }
 
 // 展示模式类型
@@ -39,7 +41,11 @@ const UploadControl: React.FC<ImageUploaderProps> = ({ onFilesChange }) => {
         }
 
         const preview = URL.createObjectURL(file);
-        newFiles.push({ file, preview });
+        newFiles.push({
+          file,
+          preview,
+          id: Math.random().toString(36).substr(2, 9),
+        });
       });
 
       onFilesChange?.(newFiles);
@@ -96,21 +102,39 @@ const UploadControl: React.FC<ImageUploaderProps> = ({ onFilesChange }) => {
         className={`
           relative w-full min-h-[200px] border border-gray-200 rounded-lg
           flex flex-col items-center justify-center
-          ${isDragging ? "bg-blue-50 border-blue-300" : "bg-gray-50/50 hover:bg-gray-50"}
+          ${
+            isDragging
+              ? "bg-blue-50 border-blue-300"
+              : "bg-gray-50/50 hover:bg-gray-50"
+          }
           transition-colors duration-200 px-6 py-8
         `}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        onDrop={handleDrop}>
-        <input ref={fileInputRef} type="file" multiple accept="image/*" className="hidden" onChange={handleFileInput} />
+        onDrop={handleDrop}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileInput}
+        />
 
         <Upload className="w-8 h-8 text-gray-400 mb-4" />
         <div className="space-y-3 text-center">
           <p className="text-sm text-gray-600">拖拽图片到此处或</p>
-          <Button variant="outline" onClick={handleButtonClick} className="h-8 px-4 text-sm">
+          <Button
+            variant="outline"
+            onClick={handleButtonClick}
+            className="h-8 px-4 text-sm"
+          >
             选择图片
           </Button>
-          <p className="text-xs text-gray-500">支持 JPG、PNG、GIF 格式，单个文件不超过5MB</p>
+          <p className="text-xs text-gray-500">
+            支持 JPG、PNG、GIF 格式，单个文件不超过5MB
+          </p>
         </div>
       </div>
     </div>
@@ -122,8 +146,9 @@ const ImageList: React.FC<{
   files: UploadedFile[];
   onRemove: (index: number) => void;
   viewMode: ViewMode;
-  filterText: string; // 新增的筛选文本属性
+  filterText: string;
 }> = ({ files, onRemove, viewMode, filterText }) => {
+  const router = useRouter();
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
   const handleImageClick = (e: React.MouseEvent, preview: string) => {
@@ -140,7 +165,9 @@ const ImageList: React.FC<{
   };
 
   // 根据筛选文本过滤文件
-  const filteredFiles = files.filter((file) => file.file.name.toLowerCase().includes(filterText.toLowerCase()));
+  const filteredFiles = files.filter((file) =>
+    file.file.name.toLowerCase().includes(filterText.toLowerCase())
+  );
 
   const closeFullscreen = () => {
     setFullscreenImage(null);
@@ -153,10 +180,18 @@ const ImageList: React.FC<{
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-50">
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">预览</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">文件名</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">大小</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">操作</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                  预览
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  文件名
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  大小
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                  操作
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -164,14 +199,23 @@ const ImageList: React.FC<{
                 <tr key={index} className="hover:bg-gray-50">
                   <td className="px-4 py-2">
                     <div className="w-12 h-12 rounded overflow-hidden">
-                      <img src={file.preview} alt={file.file.name} className="w-full h-full object-cover cursor-pointer" onClick={(e) => handleImageClick(e, file.preview)} />
+                      <img
+                        src={file.preview}
+                        alt={file.file.name}
+                        className="w-full h-full object-cover cursor-pointer"
+                        onClick={(e) => handleImageClick(e, file.preview)}
+                      />
                     </div>
                   </td>
                   <td className="px-4 py-2">
-                    <p className="text-sm text-gray-900 truncate max-w-xs">{file.file.name}</p>
+                    <p className="text-sm text-gray-900 truncate max-w-xs">
+                      {file.file.name}
+                    </p>
                   </td>
                   <td className="px-4 py-2">
-                    <p className="text-sm text-gray-500">{formatFileSize(file.file.size)}</p>
+                    <p className="text-sm text-gray-500">
+                      {formatFileSize(file.file.size)}
+                    </p>
                   </td>
                   <td className="px-4 py-2">
                     <div className="flex gap-2">
@@ -180,15 +224,37 @@ const ImageList: React.FC<{
                           e.stopPropagation();
                           setFullscreenImage(file.preview);
                         }}
-                        className="p-1.5 rounded-lg hover:bg-gray-100">
+                        className="p-1.5 rounded-lg hover:bg-gray-100"
+                      >
                         <Expand className="w-4 h-4 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const fileData = {
+                            name: file.file.name,
+                            preview: file.preview,
+                            id: file.id,
+                          };
+                          router.push(
+                            `/edit/${encodeURIComponent(
+                              file.file.name
+                            )}?data=${encodeURIComponent(
+                              JSON.stringify(fileData)
+                            )}`
+                          );
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-gray-100"
+                      >
+                        <Pencil className="w-4 h-4 text-gray-600" />
                       </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onRemove(index);
                         }}
-                        className="p-1.5 rounded-lg hover:bg-gray-100">
+                        className="p-1.5 rounded-lg hover:bg-gray-100"
+                      >
                         <X className="w-4 h-4 text-gray-600" />
                       </button>
                     </div>
@@ -201,10 +267,17 @@ const ImageList: React.FC<{
 
         {fullscreenImage && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
-            <img src={fullscreenImage} alt="fullscreen preview" className="max-w-full max-h-full object-contain" />
+            <img
+              src={fullscreenImage}
+              alt="fullscreen preview"
+              className="max-w-full max-h-full object-contain"
+            />
 
             {/* 右上角的关闭按钮 */}
-            <button onClick={closeFullscreen} className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
+            <button
+              onClick={closeFullscreen}
+              className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md hover:bg-gray-100"
+            >
               <X className="w-5 h-5 text-gray-800" />
             </button>
           </div>
@@ -215,15 +288,46 @@ const ImageList: React.FC<{
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {files.map((file, index) => (
-        <div key={index} className="relative group rounded-lg overflow-hidden bg-gray-50 border border-gray-200">
+        <div
+          key={index}
+          className="relative group rounded-lg overflow-hidden bg-gray-50 border border-gray-200"
+        >
           <div className="relative aspect-square">
-            <img src={file.preview} alt={file.file.name} className="w-full h-full object-cover" />
+            <img
+              src={file.preview}
+              alt={file.file.name}
+              className="w-full h-full object-cover"
+            />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="absolute top-2 right-2 flex gap-2">
-                <button onClick={() => setFullscreenImage(file.preview)} className="p-1.5 rounded-full bg-white/90 hover:bg-white transition-colors">
+                <button
+                  onClick={() => setFullscreenImage(file.preview)}
+                  className="p-1.5 rounded-full bg-white/90 hover:bg-white transition-colors"
+                >
                   <Expand className="w-4 h-4 text-gray-700" />
                 </button>
-                <button onClick={() => onRemove(index)} className="p-1.5 rounded-full bg-white/90 hover:bg-white transition-colors">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const fileData = {
+                      name: file.file.name,
+                      preview: file.preview,
+                      id: file.id,
+                    };
+                    router.push(
+                      `/edit/${encodeURIComponent(
+                        file.file.name
+                      )}?data=${encodeURIComponent(JSON.stringify(fileData))}`
+                    );
+                  }}
+                  className="p-1.5 rounded-full bg-white/90 hover:bg-white transition-colors"
+                >
+                  <Pencil className="w-4 h-4 text-gray-700" />
+                </button>
+                <button
+                  onClick={() => onRemove(index)}
+                  className="p-1.5 rounded-full bg-white/90 hover:bg-white transition-colors"
+                >
                   <X className="w-4 h-4 text-gray-700" />
                 </button>
               </div>
@@ -237,10 +341,17 @@ const ImageList: React.FC<{
 
       {fullscreenImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
-          <img src={fullscreenImage} alt="fullscreen preview" className="max-w-full max-h-full object-contain" />
+          <img
+            src={fullscreenImage}
+            alt="fullscreen preview"
+            className="max-w-full max-h-full object-contain"
+          />
 
           {/* 右上角的关闭按钮 */}
-          <button onClick={closeFullscreen} className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
+          <button
+            onClick={closeFullscreen}
+            className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md hover:bg-gray-100"
+          >
             <X className="w-5 h-5 text-gray-800" />
           </button>
         </div>
@@ -277,12 +388,27 @@ const ImageUploader = () => {
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-medium">已上传图片</h2>
             <div className="flex gap-2">
-              <Input placeholder="筛选文件" value={filterText} onChange={(e) => setFilterText(e.target.value)} className="h-8 text-sm px-2" />
-              <Button variant={viewMode === "grid" ? "default" : "outline"} size="sm" onClick={() => setViewMode("grid")} className="px-3">
+              <Input
+                placeholder="筛选文件"
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+                className="h-8 text-sm px-2"
+              />
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+                className="px-3"
+              >
                 <Grid className="w-4 h-4 mr-1" />
                 网格
               </Button>
-              <Button variant={viewMode === "table" ? "default" : "outline"} size="sm" onClick={() => setViewMode("table")} className="px-3">
+              <Button
+                variant={viewMode === "table" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("table")}
+                className="px-3"
+              >
                 <List className="w-4 h-4 mr-1" />
                 列表
               </Button>
